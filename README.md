@@ -15,11 +15,19 @@
 - **不附加额外限制**：预设不添加设定之外的道德说教或行为限制；边界完全由导入的设定与用户指令定义。
 - **终端控制权（Linux / Shell）**：Agent 拥有这台电脑的真实终端控制权——通过 Shell（bash）实际执行命令、读写文件、操作程序与系统，留下可验证的真实结果；说"用命令做某事"就是真的去执行，而不是口头描述。
 - **命令 + 工具交互**：
-  - `/char <角色卡>` — 导入角色设定
+  - `/char <角色卡>` — 导入角色设定（文本直贴）
+  - `/char load <路径>` — 从文件加载角色卡，**支持 SKILL.md**（自动剥离 frontmatter 取正文）
+  - `/memory load <路径>` — 加载你写的记忆文件（.md/.txt），注入为长期记忆
+  - `/memory clear` / `/memory` — 清除 / 查看记忆状态
   - `/roll [数量]d[面数][+/-修正]` — 掷骰子（如 `/roll 2d6`、`/roll d20+2`）
   - `/reset` — 清除角色卡，回到空容器
-  - `/status` — 查看当前角色状态
+  - `/status` — 查看当前角色与记忆状态
   - 完整工具面：Shell、文件读写/检索、网页检索、询问用户、待办、后台任务、Skills、压缩
+- **记忆系统**：记忆文件是跨会话的持久档案——你写、她维护。加载后扮演中产生的
+  值得记住的信息（人物、事件、关系、秘密、剧情）由 Agent 用文件工具**主动合并更新**
+  回记忆文件；会话恢复自动重放，设定与记忆都不丢。
+- **自带 Skill**：预设携带 `rp-character` Skill（角色卡 + 记忆文件模板），skill 系统
+  自动发现，可随时参考。
 - **严格遵守用户指令**：用户指令优先于默认行为；OOC（Out Of Character）随时可切换。
 
 ## 快速开始
@@ -65,7 +73,8 @@ OOC 示例：`（OOC：现在切换到现代都市背景）` — Agent 会遵循
 ## 设计说明
 
 - **预设组成**（`preset/rp-shell/agent.cordis.yml`）：空容器 persona + 完整工具面 + 压缩组。
-- **命令插件**（`preset/rp-shell/rp-commands.mjs`）：`/char` 把角色卡写入持久会话事件 `rp/character`，并注入 per-agent 系统提示词区段；`agent/session-start` 时自动重放，重启不丢。
+- **命令插件**（`preset/rp-shell/rp-commands.mjs`）：`/char`（文本或 `load <路径>` 从 SKILL.md/文件加载）把角色卡写入持久会话事件 `rp/character`；`/memory load <路径>` 把记忆文件写入 `rp/memory`；两者都注入 per-agent 系统提示词区段，`agent/session-start` 时自动重放，重启不丢。记忆区段内声明维护规则，扮演中 Agent 用文件工具主动读写记忆文件实现自主更新。
+- **自带 Skill**（`preset/rp-shell/skills/rp-character/SKILL.md`）：角色卡与记忆文件模板，`skill-filesystem` 通过 `customSkillDirs` 自动发现。
 - **bundle 层**（`lib/index.js` + `cordis.patch.yml`）：幂等安装/升级预设到 `$DSH_HOME/.agent-presets/rp-shell/`（同版本跳过、不同版本备份后升级），预设目录用户可手工编辑。
 
 ## 开源到插件市场
