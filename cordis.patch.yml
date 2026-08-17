@@ -1,0 +1,13 @@
+# dsh-rp-shell bundle layer: mounts the preset installer once per process.
+#
+# The installer copies the bundled `rp-shell` agent preset into
+# `$DSH_HOME/.agent-presets/rp-shell/` (idempotent, user-editable), so the
+# preset shows up in the session picker. The commands and prompt sections live
+# in the PRESET composition (`preset/rp-shell/agent.cordis.yml` +
+# `preset/rp-shell/rp-commands.mjs`), not here: they are scoped to sessions
+# that actually choose the preset, and never leak into other agents.
+- insert:
+    - id: rp-shell
+      name: '@dsh-external/dsh-rp-shell'
+      config:
+        installPreset: true

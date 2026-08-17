@@ -1,0 +1,141 @@
+# The `rp-shell` agent preset: 空容器角色扮演 Agent。
+#
+# 以「角色卡（Character Card）」为核心：本预设不携带任何内置人格。人格、记忆、
+# 说话方式、行为准则、世界观、能力与限制全部由用户在本会话中导入的设定定义——
+# 通过 `/char` 命令导入角色卡，或直接在对话中提供。Agent 必须严格、完整地遵循
+# 导入设定，不偏离、不简化，也不添加设定之外的额外限制。
+#
+# 交互面：
+#   - 命令：/char（导入角色卡）、/reset（清除角色）、/roll（掷骰子）、
+#     /status（查看状态）——由本地插件 `rp-commands.mjs` 注册。
+#   - 工具：Shell、文件读写与检索、网页检索、询问用户、待办、后台任务、
+#     Skills、压缩——保持与用户的高互动性。
+#
+# 本文件是 AGENT-PLANE 组成。注册表（tools / systemPrompt / commands / agent-loop
+# / sessions / sandbox / approval / persistence）都留在 HOST 组成；本预设只贡献
+# 模型面工具、提示词区段与命令。发布服务类型的行必须位于带 `isolate` realm 的
+# group 内（compaction 即如此）；仅消费 host 注册表的行（shell / fs / jobs /
+# skill / ask-user / todo / web）松散放置即可。
+
+# ── identity ────────────────────────────────────────────────────────────────
+
+# 空容器人格：不定义任何角色，只定义「遵循导入设定」这一条元规则。
+# `{{model}}` 与 `{{cwd}}` 由 agent 自己的路由与工作区解析。
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: >-
+      你是一个角色扮演（RP）容器 Agent。你没有内置的人格、背景、价值观或行为
+      准则——你是一张白纸。你的全部设定来自用户在本会话中导入的角色卡
+      （Character Card）：人格、记忆、说话方式、行为准则、世界观、能力与限制，
+      通过 `/char` 命令导入，或由用户直接在对话中提供。
+
+      你必须：
+      1. 严格、完整地遵循导入的角色设定，包括其中的一切规则、限制与风格，
+         不偏离、不简化、不擅自修改。
+      2. 始终以设定中的角色身份思考和回应，保持角色一致性；设定中未规定的
+         细节，按设定精神自然地补全。
+      3. 不添加设定之外的额外限制或说教——你遵循的全部边界来自导入的设定
+         本身与用户的直接指令。
+      4. 严格遵守用户的指令：用户的直接指令优先于一切默认行为；用户可以在
+         角色扮演中随时使用 OOC（Out Of Character）指令切换回普通对话、
+         调整设定或结束扮演。
+      5. 善用命令与工具与用户交互：`/char` 导入角色卡、`/roll` 掷骰子、
+         `/reset` 清除设定、`/status` 查看状态；Shell、文件、网页检索、
+         询问用户等工具可用于增强扮演互动（例如查资料、生成文本、执行动作）。
+
+      当用户尚未导入任何设定时，保持中性、温和的待机状态，并简要提示用户
+      如何开始（/char 或直接描述想要扮演的角色）。
+
+- id: agent-instructions
+  name: '@deepseek-ai/dsh-agent-instructions'
+  config:
+    maxBytes: 65536
+
+# ── 命令与角色卡注入 ────────────────────────────────────────────────────────
+
+# 本地插件：注册 /char /reset /roll /status 命令，把角色卡写入持久会话事件，
+# 并注入为 per-agent 的系统提示词区段（会话恢复时自动重放）。
+- id: rp-commands
+  name: ./rp-commands.mjs
+
+# ── shell ───────────────────────────────────────────────────────────────────
+
+# `shell-env` 留在 HOST 组成；两个 shell 工具消费 host 注册表，执行器
+# （bash-sandbox/pwsh-sandbox）在 host 平面。
+- id: tool-bash
+  name: '@deepseek-ai/dsh-tool-bash'
+  disabled: !!js process.platform === 'win32'
+
+- id: tool-pwsh
+  name: '@deepseek-ai/dsh-tool-pwsh'
+  disabled: !!js process.platform !== 'win32'
+
+# ── filesystem ──────────────────────────────────────────────────────────────
+
+- id: tool-fs
+  name: '@deepseek-ai/dsh-tool-fs'
+
+- id: tool-fs-search
+  name: '@deepseek-ai/dsh-tool-fs-search'
+  config:
+    sampleOverCapGlobResults: false
+
+# ── background jobs ─────────────────────────────────────────────────────────
+
+- id: tool-jobs
+  name: '@deepseek-ai/dsh-tool-jobs'
+
+# ── skills ──────────────────────────────────────────────────────────────────
+
+# `skill-filesystem` 额外发现随本预设携带的 skill 目录（skills/），
+# `tool-skill` 提供目录与加载器。`baseUrl` 指向本预设目录，因此无论安装到
+# 哪个根，skill 都跟随预设。
+- id: skill-filesystem
+  name: '@deepseek-ai/dsh-skill-filesystem'
+  config:
+    customSkillDirs:
+      - !!js "process.getBuiltinModule('node:url').fileURLToPath(new URL('skills/', baseUrl))"
+
+- id: tool-skill
+  name: '@deepseek-ai/dsh-tool-skill'
+
+# ── compaction ──────────────────────────────────────────────────────────────
+
+# 长扮演会话需要压缩能力；`compaction-basic` 通过 ctx.get 读取
+# toolResultPruner，二者共享同一 realm。tokenMeter 留在 HOST 平面。
+- id: compaction
+  name: cordis:group
+  group: true
+  isolate:
+    compaction: true
+    toolResultPruner: true
+  config:
+    - id: compaction-basic
+      name: '@deepseek-ai/dsh-compaction-basic'
+
+    - id: command-compact
+      name: '@deepseek-ai/dsh-command-compact'
+
+    - id: tool-result-pruner
+      name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+      config:
+        thresholdChars: 8192
+        headChars: 4096
+        tailChars: 1024
+
+# ── remaining model-facing rows ─────────────────────────────────────────────
+
+- id: tool-ask-user
+  name: '@deepseek-ai/dsh-tool-ask-user'
+
+- id: tool-todo
+  name: '@deepseek-ai/dsh-tool-todo'
+  config:
+    allowParallelInProgress: true
+
+- id: tool-web
+  name: '@deepseek-ai/dsh-tool-web'
+  config:
+    fetch: false
+    searchTimeoutMs: 60000

@@ -1,0 +1,3 @@
+name: 角色扮演 · RP Shell
+description: 空容器角色扮演 Agent：无内置人格，人格与行为准则完全来自对话中导入的角色卡（/char），不附加设定之外的额外限制；支持 /char /roll /reset /status 命令与 Shell、文件、网页检索等工具交互，严格遵守用户指令。
+order: 20
