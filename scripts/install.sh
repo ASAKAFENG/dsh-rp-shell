@@ -10,7 +10,7 @@
 #   远程模式（直接从 GitHub Release 下载安装，无需克隆仓库）：
 #     bash scripts/install.sh --github
 #     或一条命令：
-#     curl -fsSL https://raw.githubusercontent.com/<owner>/dsh-rp-shell/main/scripts/install.sh | bash -s -- --github
+#     curl -fsSL https://raw.githubusercontent.com/ASAKAFENG/dsh-rp-shell/main/scripts/install.sh | bash -s -- --github
 #
 # 可选参数：
 #   --profile <name>   目标 profile 名（默认 web，可用环境变量 DSH_RP_SHELL_PROFILE 覆盖）
@@ -22,7 +22,7 @@
 set -euo pipefail
 
 # ── 常量 ─────────────────────────────────────────────────────────────────────
-REPO="${DSH_RP_SHELL_REPO:-<owner>/dsh-rp-shell}"
+REPO="${DSH_RP_SHELL_REPO:-ASAKAFENG/dsh-rp-shell}"
 PKG_NAME="@dsh-external/dsh-rp-shell"
 PRESET_ID="rp-shell"
 VERSION_MARKER="VERSION"

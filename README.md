@@ -35,7 +35,7 @@
 ### 方式一：本地安装（开发/自用）
 
 ```bash
-git clone <your-repo-url> dsh-rp-shell
+git clone https://github.com/ASAKAFENG/dsh-rp-shell dsh-rp-shell
 cd dsh-rp-shell
 bash scripts/build.sh          # 语法检查 + 链接运行时依赖 + 打包 tgz
 bash scripts/install.sh        # 装配进 DSH profile（默认 web）
@@ -46,7 +46,7 @@ bash scripts/install.sh        # 装配进 DSH profile（默认 web）
 ### 方式二：从 GitHub Release 安装
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<owner>/dsh-rp-shell/main/scripts/install.sh | bash -s -- --github
+curl -fsSL https://raw.githubusercontent.com/ASAKAFENG/dsh-rp-shell/main/scripts/install.sh | bash -s -- --github
 ```
 
 ### 方式三：插件市场安装
@@ -79,7 +79,7 @@ OOC 示例：`（OOC：现在切换到现代都市背景）` — Agent 会遵循
 
 ## 开源到插件市场
 
-1. **建仓**：创建 GitHub 仓库（如 `<owner>/dsh-rp-shell`），把本目录推上去（记得把 `package.json` 的 `repository.url` 与 `scripts/install.sh` 里的 `REPO` 改成你的仓库）。
+1. **建仓**：本仓库 `ASAKAFENG/dsh-rp-shell` 已配置好 `repository.url` 与 `install.sh` 的 `REPO`，直接 push 即可。
 2. **构建**：`bash scripts/build.sh` 产出 `dist/dsh-external-dsh-rp-shell-<version>.tgz`。
 3. **发版**：用 `gh release create v<version> dist/*.tgz` 发布（附 tgz 资产）。
 4. **上市场**：在 DSH 插件市场提交/收录你的仓库（`@dsh-external/dsh-rp-shell` 类型为 `cordis-plugin`，自带 `agent-preset` 安装器）；给仓库打 `dsh-plugin` / `deepseek-harness` topic 便于检索。

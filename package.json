@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/<owner>/dsh-rp-shell.git"
+    "url": "git+https://github.com/ASAKAFENG/dsh-rp-shell.git"
   },
   "keywords": [
     "dsh",
