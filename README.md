@@ -77,14 +77,6 @@ OOC 示例：`（OOC：现在切换到现代都市背景）` — Agent 会遵循
 - **自带 Skill**（`preset/rp-shell/skills/rp-character/SKILL.md`）：角色卡与记忆文件模板，`skill-filesystem` 通过 `customSkillDirs` 自动发现。
 - **bundle 层**（`lib/index.js` + `cordis.patch.yml`）：幂等安装/升级预设到 `$DSH_HOME/.agent-presets/rp-shell/`（同版本跳过、不同版本备份后升级），预设目录用户可手工编辑。
 
-## 开源到插件市场
-
-1. **建仓**：本仓库 `ASAKAFENG/dsh-rp-shell` 已配置好 `repository.url` 与 `install.sh` 的 `REPO`，直接 push 即可。
-2. **构建**：`bash scripts/build.sh` 产出 `dist/dsh-external-dsh-rp-shell-<version>.tgz`。
-3. **发版**：用 `gh release create v<version> dist/*.tgz` 发布（附 tgz 资产）。
-4. **上市场**：在 DSH 插件市场提交/收录你的仓库（`@dsh-external/dsh-rp-shell` 类型为 `cordis-plugin`，自带 `agent-preset` 安装器）；给仓库打 `dsh-plugin` / `deepseek-harness` topic 便于检索。
-5. **迭代**：改 `preset/` 或 `lib/` → bump `package.json` version → 重新 build + release。
-
 ## 许可
 
 MIT — 见 [LICENSE](./LICENSE)。
